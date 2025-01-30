@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/nawarani/tinyapp/issues"
   },
-  "homepage": "https://github.com/nawarani/tinyapp#readme"
+  "homepage": "https://github.com/nawarani/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
 }
