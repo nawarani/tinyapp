@@ -52,9 +52,10 @@ function generateRandomString() {
 };
 app.post("/urls", (req, res) => {
   console.log(req.body);// Log the POST request body to the console
-  const id = generateRandomString();
-  while (!urlDatabase[id]) {
+  let id = generateRandomString();
+  while (urlDatabase[id]) {
     id = generateRandomString();
+    console.log("generating new id", id, urlDatabase[id]);
   }
   urlDatabase[id] = req.body.longURL;
   res.redirect(`/urls/${id}`);
@@ -63,4 +64,10 @@ app.post("/urls", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const longURL = req.params.id;
   res.redirect(urlDatabase[longURL]);
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  id = req.params.id;
+  delete urlDatabase[id]
+  res.redirect(`/urls`);
 });
