@@ -53,6 +53,14 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = { 
+    id: req.params.id,
+    username: req.cookies["username"]
+  };
+  res.render("register.ejs", templateVars);
+});
+
 function generateRandomString() {
   const str = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let id = '';
@@ -99,3 +107,4 @@ app.post("/logout", (req, res) => {
   res.clearCookie('username');
   res.redirect(`/urls`);
 });
+
