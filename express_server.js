@@ -42,10 +42,10 @@ app.get("/urls/:id", (req, res) => {
 });
 
 function generateRandomString() {
-  str = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  id = '';
+  const str = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let id = '';
   for(let c = 0; c < 6; c++) {
-    i = Math.floor(Math.random()*str.length);
+    let i = Math.floor(Math.random()*str.length);
     id += str[i];
   }
   return id;
