@@ -20,20 +20,25 @@
     <%- include('partials/_header') %>
     <main style="margin:1em;height:auto">
       <div style="margin:auto;width:50%">
+        <h3>Create Account</h3>
         <form method="POST" action="/register" >
+          <!-- <label>Email address</label> -->
           <input 
             class="form-control"
             type="email"
             placeholder="email"
             name="email"
+            style="margin:5px"
           />
+          <!-- <label>Password</label> -->
           <input 
             class="form-control"
             type="password"
             placeholder="password"
             name="password"
+            style="margin:5px"
           />
-          <button type="submit" class="btn btn-primary  mb-3">Register</button>
+          <button type="submit" class="btn btn-primary  mb-3" style="margin:5px">Register</button>
         </form>
       </div>
     </main>

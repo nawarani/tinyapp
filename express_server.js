@@ -131,14 +131,25 @@ app.get("/login", (req, res) => {
   };
   res.render("login.ejs", templateVars);
 });
-// app.post("/login", (req, res) => {
-//   res.cookie("username", req.body.username);
-//   res.redirect(`/urls`);
-// });
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = getUserByEmail(email);
+  if (email === '' || password === ''){
+    res.status(403).send("Email or password cannot be left empty");
+  } else if (user === null) {
+    res.status(403).send("Email not registered");
+  } else if (user.password !== password) {
+    res.status(403).send("wrong email or password");
+  } else {
+    res.cookie("user_id", user.id);
+    res.redirect(`/urls`);
+  }
+});
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
-  res.redirect(`/urls`);
+  res.redirect(`/login`);
 });
 
 

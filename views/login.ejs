@@ -19,6 +19,8 @@
     <%- include('partials/_header') %>
       <main style="margin:1em;height:auto">
         <div style="margin:auto;width:50%">
+          <h3>Login</h3>
+          <label>Email address</label>
           <form method="POST" action="/login" >
             <input 
               class="form-control"
@@ -26,6 +28,7 @@
               placeholder="email"
               name="email"
             />
+            <label>Password</label>
             <input 
               class="form-control"
               type="password"
