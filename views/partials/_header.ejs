@@ -17,9 +17,9 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
-      <% if(username !== undefined) { %>
+      <% if(user !== undefined) { %>
         <div style="width:300px;display:flex">
-          <div style="color: white;padding:20px"> Logged in as: <%= username %> </div>
+          <div style="color: white;padding:20px"> Logged in as: <%= user.email %> </div>
           <form method="POST" action="/logout">
             <button type="submit" class="btn btn-primary" style="margin:10px">Logout</button>
           </form>
