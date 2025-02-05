@@ -122,21 +122,39 @@ app.post("/logout", (req, res) => {
   res.redirect(`/urls`);
 });
 
-app.post("/register", (req, res) => {
-  let email = req.body.email;
-  let password = req.body.password;
-  let id = generateRandomString();
-  while (users[id]) {
-    id = generateRandomString();
+const getUserByEmail = function(email) {
+  if (email !== '') {
+    for (id in users) {
+      if (users[id].email === email) {
+        return users[id];
+      }
+    }
   }
-  let user = {
-    id: id,
-    email: email,
-    password: password
-  };
-  users[id] = user;
-  res.cookie("user_id", id);
-  res.redirect(`/urls`);
+  return null;
+};
+
+app.post("/register", (req, res) => {
+  if (req.body.email === '' || req.body.password === '') {
+    res.status(400).send('Email or password cannot be empty');
+  } else if (getUserByEmail(req.body.email)) {
+    res.status(400).send('User already exists, please log in');
+  } else {
+    let email = req.body.email;
+    let password = req.body.password;
+    let id = generateRandomString();
+    while (users[id]) {
+      id = generateRandomString();
+    }
+    let user = {
+      id: id,
+      email: email,
+      password: password
+    };
+    users[id] = user;
+    res.cookie("user_id", id);
+    res.redirect(`/urls`);
+  }
+  console.log('users database: ', users);
 });
 
 
