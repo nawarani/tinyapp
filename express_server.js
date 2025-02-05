@@ -5,7 +5,9 @@ const PORT = 8080;
 
 app.set("view engine", "ejs");
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
 
+// data 
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
@@ -24,8 +26,27 @@ const users = {
   },
 };
 
+// helper functions
+function generateRandomString() {
+  const str = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let id = '';
+  for(let c = 0; c < 6; c++) {
+    let i = Math.floor(Math.random()*str.length);
+    id += str[i];
+  }
+  return id;
+};
+const getUserByEmail = function(email) {
+  if (email !== '') {
+    for (id in users) {
+      if (users[id].email === email) {
+        return users[id];
+      }
+    }
+  }
+  return null;
+};
 
-app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -75,15 +96,7 @@ app.get("/register", (req, res) => {
   res.render("register.ejs", templateVars);
 });
 
-function generateRandomString() {
-  const str = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let id = '';
-  for(let c = 0; c < 6; c++) {
-    let i = Math.floor(Math.random()*str.length);
-    id += str[i];
-  }
-  return id;
-};
+
 app.post("/urls", (req, res) => {
   console.log(req.body);// Log the POST request body to the console
   let id = generateRandomString();
@@ -112,6 +125,12 @@ app.post("/urls/:id/update", (req, res) => {
   res.redirect(`/urls`);
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = { 
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("login.ejs", templateVars);
+});
 // app.post("/login", (req, res) => {
 //   res.cookie("username", req.body.username);
 //   res.redirect(`/urls`);
@@ -122,16 +141,6 @@ app.post("/logout", (req, res) => {
   res.redirect(`/urls`);
 });
 
-const getUserByEmail = function(email) {
-  if (email !== '') {
-    for (id in users) {
-      if (users[id].email === email) {
-        return users[id];
-      }
-    }
-  }
-  return null;
-};
 
 app.post("/register", (req, res) => {
   if (req.body.email === '' || req.body.password === '') {
