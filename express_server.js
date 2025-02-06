@@ -9,8 +9,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // data 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b2xVn2: {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "default"
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "default"
+  }
 };
 
 const users = {
@@ -49,6 +55,15 @@ const getUserByEmail = function(email) {
 const loggedIn = (req, res) => {
   return Boolean(users[req.cookies["user_id"]]);
 }
+const urlsForUser = (id) => {
+  const obj = {};
+  for (urlID in urlDatabase) {
+    if (urlDatabase[urlID].userID === id) {
+      obj[urlID] = urlDatabase[urlID];
+    }
+  }
+  return obj;
+};
 
 
 app.get("/", (req, res) => {
@@ -68,11 +83,15 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { 
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("urls_index", templateVars);
+  if (!loggedIn(req, res)) {
+    res.send("Please log in to view list of short urls");
+  } else {
+    const templateVars = { 
+      urls: urlDatabase,
+      user: users[req.cookies["user_id"]]
+    };
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -87,12 +106,18 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { 
-    id: req.params.id, 
-    longURL: urlDatabase[req.params.id],
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("urls_show", templateVars);
+  if (!loggedIn(req, res)) {
+    res.send("Please log in to view the url");
+  } else if (!Object.keys(urlsForUser(id)).includes(id)) {
+    res.send("You can only access your short urls");
+  } else {
+    const templateVars = { 
+      id: req.params.id, 
+      longURL: urlDatabase[req.params.id].longURL,
+      user: users[req.cookies["user_id"]]
+    };
+    res.render("urls_show", templateVars);
+  }
 });
 
 app.get("/register", (req, res) => {
@@ -107,7 +132,6 @@ app.get("/register", (req, res) => {
   }
 });
 
-
 app.post("/urls", (req, res) => {
   if (!users[req.cookies["user_id"]]) {
     res.send("Only registered users can shorten URLs, please register first");
@@ -118,28 +142,49 @@ app.post("/urls", (req, res) => {
     id = generateRandomString();
     console.log("generating new id", id, urlDatabase[id]);
   }
-  urlDatabase[id] = req.body.longURL;
+  urlDatabase[id] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["user_id"]
+  };
+  console.log("urlDatabase after adding new url: ", urlDatabase);
   res.redirect(`/urls/${id}`);
 });
 
 app.get("/u/:id", (req, res) => {
   if (!Object.keys(urlDatabase).includes(req.params.id)) {
     res.send("Please enter a valid short url");
+  } else {
+    const URLid = req.params.id;
+    res.redirect(urlDatabase[URLid].longURL);
   }
-  const longURL = req.params.id;
-  res.redirect(urlDatabase[longURL]);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
-  delete urlDatabase[id]
-  res.redirect(`/urls`);
+  if (!Object.keys(urlDatabase).inludes(id)) {
+    res.send("id does not exist");
+  } else if (!loggedIn(req, res)) {
+    res.send("please log in");
+  } else if (!Object.keys(urlsForUser(id)).includes(id)){
+    res.send("You can only edit your own urls");
+  } else {
+    delete urlDatabase[id]
+    res.redirect(`/urls`);
+  }
 });
 
-app.post("/urls/:id/update", (req, res) => {
+app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
-  urlDatabase[id] = req.body.longURL;
-  res.redirect(`/urls`);
+  if (!Object.keys(urlDatabase).inludes(id)) {
+    res.send("id does not exist");
+  } else if (!loggedIn(req, res)) {
+    res.send("please log in");
+  } else if (!Object.keys(urlsForUser(id)).includes(id)){
+    res.send("You can only edit your own urls");
+  } else {
+    urlDatabase[id].longURL = req.body.longURL;
+    res.redirect(`/urls`);
+  }
 });
 
 app.get("/login", (req, res) => {
@@ -152,6 +197,7 @@ app.get("/login", (req, res) => {
     res.render("login.ejs", templateVars);
   }
 });
+
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -172,7 +218,6 @@ app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
   res.redirect(`/login`);
 });
-
 
 app.post("/register", (req, res) => {
   if (req.body.email === '' || req.body.password === '') {
