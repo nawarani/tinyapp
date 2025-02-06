@@ -46,6 +46,9 @@ const getUserByEmail = function(email) {
   }
   return null;
 };
+const loggedIn = () => {
+  return Boolean(users[req.cookies["user_id"]]);
+}
 
 
 app.get("/", (req, res) => {
@@ -73,10 +76,14 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { 
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("urls_new", templateVars);
+  if (!users[req.cookies["user_id"]]) {
+    res.redirect(`/login`);
+  } else {
+    const templateVars = { 
+      user: users[req.cookies["user_id"]]
+    };
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -89,15 +96,22 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { 
-    id: req.params.id,
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("register.ejs", templateVars);
+  if (users[req.cookies["user_id"]]) {
+    res.redirect(`/urls`);
+  } else {
+    const templateVars = { 
+      id: req.params.id,
+      user: users[req.cookies["user_id"]]
+    };
+    res.render("register.ejs", templateVars);
+  }
 });
 
 
 app.post("/urls", (req, res) => {
+  if (!users[req.cookies["user_id"]]) {
+    res.send("Only registered users can shorten URLs, please register first");
+  }
   console.log(req.body);// Log the POST request body to the console
   let id = generateRandomString();
   while (urlDatabase[id]) {
@@ -109,6 +123,9 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
+  if (!Object.keys(urlDatabase).includes(req.params.id)) {
+    res.send("Please enter a valid short url");
+  }
   const longURL = req.params.id;
   res.redirect(urlDatabase[longURL]);
 });
@@ -126,10 +143,14 @@ app.post("/urls/:id/update", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = { 
-    user: users[req.cookies["user_id"]]
-  };
-  res.render("login.ejs", templateVars);
+  if (users[req.cookies["user_id"]]) {
+    res.redirect(`/urls`);
+  } else {
+    const templateVars = { 
+      user: users[req.cookies["user_id"]]
+    };
+    res.render("login.ejs", templateVars);
+  }
 });
 app.post("/login", (req, res) => {
   const email = req.body.email;
