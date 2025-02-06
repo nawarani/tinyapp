@@ -46,7 +46,7 @@ const getUserByEmail = function(email) {
   }
   return null;
 };
-const loggedIn = () => {
+const loggedIn = (req, res) => {
   return Boolean(users[req.cookies["user_id"]]);
 }
 
@@ -76,7 +76,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!users[req.cookies["user_id"]]) {
+  if (!loggedIn(req, res)) {
     res.redirect(`/login`);
   } else {
     const templateVars = { 
@@ -96,7 +96,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  if (users[req.cookies["user_id"]]) {
+  if (loggedIn(req, res)) {
     res.redirect(`/urls`);
   } else {
     const templateVars = { 
@@ -143,7 +143,7 @@ app.post("/urls/:id/update", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (users[req.cookies["user_id"]]) {
+  if (loggedIn(req, res)) {
     res.redirect(`/urls`);
   } else {
     const templateVars = { 
