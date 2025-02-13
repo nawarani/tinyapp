@@ -46,11 +46,11 @@ function generateRandomString() {
   }
   return id;
 };
-const getUserByEmail = function(email) {
+const getUserByEmail = function(email, database) {
   if (email !== '') {
-    for (id in users) {
-      if (users[id].email === email) {
-        return users[id];
+    for (id in database) {
+      if (database[id].email === email) {
+        return database[id];
       }
     }
   }
@@ -72,10 +72,6 @@ const urlsForUser = (id) => {
 };
 
 
-// app.get("/", (req, res) => {
-//   res.send("Hello!");
-// });
-
 app.listen(PORT, () => {
   console.log(`Example app listening in on port ${PORT}`);
 });
@@ -83,10 +79,6 @@ app.listen(PORT, () => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
 
 app.get("/urls", (req, res) => {
   if (!loggedIn(req, res)) {
@@ -208,7 +200,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
   if (email === '' || password === ''){
     res.status(403).send("Email or password cannot be left empty");
   } else if (user === null) {
@@ -229,7 +221,7 @@ app.post("/logout", (req, res) => {
 app.post("/register", (req, res) => {
   if (req.body.email === '' || req.body.password === '') {
     res.status(400).send('Email or password cannot be empty');
-  } else if (getUserByEmail(req.body.email)) {
+  } else if (getUserByEmail(req.body.email, users)) {
     res.status(400).send('User already exists, please log in');
   } else {
     let email = req.body.email;
