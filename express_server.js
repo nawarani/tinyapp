@@ -60,11 +60,11 @@ const loggedIn = (req, res) => {
   console.log('session: ', req.session);
   return Boolean(users[req.session.user_id]);
 }
-const urlsForUser = (id) => {
+const urlsForUser = (id, database) => {
   const obj = {};
-  for (urlID in urlDatabase) {
-    if (urlDatabase[urlID].userID === id) {
-      obj[urlID] = urlDatabase[urlID];
+  for (urlID in database) {
+    if (database[urlID].userID === id) {
+      obj[urlID] = database[urlID];
     }
   }
   console.log('return from urluser func: ', obj);
@@ -85,7 +85,7 @@ app.get("/urls", (req, res) => {
     res.send("Please log in to view list of short urls");
   } else {
     const templateVars = { 
-      urls: urlsForUser(req.session.user_id),
+      urls: urlsForUser(req.session.user_id, urlDatabase),
       user: users[req.session["user_id"]]
     };
     res.render("urls_index", templateVars);
@@ -104,10 +104,10 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  console.log("obj keys ine output: ", Object.keys(urlsForUser(req.session.user_id)));
+  console.log("obj keys ine output: ", Object.keys(urlsForUser(req.session.user_id, urlDatabase)));
   if (!loggedIn(req, res)) {
     res.send("Please log in to view the url");
-  } else if (!Object.keys(urlsForUser(req.session.user_id)).includes(req.params.id)) {
+  } else if (!Object.keys(urlsForUser(req.session.user_id, urlDatabase)).includes(req.params.id)) {
     res.send("You can only access your short urls");
   } else {
     const templateVars = { 
@@ -164,7 +164,7 @@ app.post("/urls/:id/delete", (req, res) => {
     res.send("id does not exist");
   } else if (!loggedIn(req, res)) {
     res.send("please log in");
-  } else if (!Object.keys(urlsForUser(req.session.user_id)).includes(id)){
+  } else if (!Object.keys(urlsForUser(req.session.user_id, urlDatabase)).includes(id)){
     res.send("You can only edit your own urls");
   } else {
     delete urlDatabase[id]
@@ -178,7 +178,7 @@ app.post("/urls/:id", (req, res) => {
     res.send("id does not exist");
   } else if (!loggedIn(req, res)) {
     res.send("please log in");
-  } else if (!Object.keys(urlsForUser(req.session.user_id)).includes(id)){
+  } else if (!Object.keys(urlsForUser(req.session.user_id, urlDatabase)).includes(id)){
     res.send("You can only edit your own urls");
   } else {
     urlDatabase[id].longURL = req.body.longURL;
