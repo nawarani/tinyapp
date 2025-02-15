@@ -4,6 +4,13 @@ const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8080;
 
+// helper functions
+const helpers = require("./helpers");
+const generateRandomString = helpers.generateRandomString;
+const getUserByEmail = helpers.getUserByEmail;
+const loggedIn = helpers.loggedIn;
+const urlsForUser = helpers.urlsForUser;
+
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
@@ -36,52 +43,17 @@ const users = {
   },
 };
 
-// helper functions
-function generateRandomString() {
-  const str = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let id = '';
-  for(let c = 0; c < 6; c++) {
-    let i = Math.floor(Math.random()*str.length);
-    id += str[i];
-  }
-  return id;
-};
-const getUserByEmail = function(email, database) {
-  if (email !== '') {
-    for (id in database) {
-      if (database[id].email === email) {
-        return database[id];
-      }
-    }
-  }
-  return null;
-};
-const loggedIn = (req, res) => {
-  console.log('session: ', req.session);
-  return Boolean(users[req.session.user_id]);
-}
-const urlsForUser = (id, database) => {
-  const obj = {};
-  for (urlID in database) {
-    if (database[urlID].userID === id) {
-      obj[urlID] = database[urlID];
-    }
-  }
-  console.log('return from urluser func: ', obj);
-  return obj;
-};
-
-
 app.listen(PORT, () => {
   console.log(`Example app listening in on port ${PORT}`);
 });
 
+// routes
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
 app.get("/urls", (req, res) => {
-  if (!loggedIn(req, res)) {
+  if (!loggedIn(req, res, users)) {
     res.send("Please log in to view list of short urls");
   } else {
     const templateVars = { 
@@ -93,7 +65,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!loggedIn(req, res)) {
+  if (!loggedIn(req, res, users)) {
     res.redirect(`/login`);
   } else {
     const templateVars = { 
@@ -105,7 +77,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   console.log("obj keys ine output: ", Object.keys(urlsForUser(req.session.user_id, urlDatabase)));
-  if (!loggedIn(req, res)) {
+  if (!loggedIn(req, res, users)) {
     res.send("Please log in to view the url");
   } else if (!Object.keys(urlsForUser(req.session.user_id, urlDatabase)).includes(req.params.id)) {
     res.send("You can only access your short urls");
@@ -120,7 +92,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  if (loggedIn(req, res)) {
+  if (loggedIn(req, res, users)) {
     res.redirect(`/urls`);
   } else {
     const templateVars = { 
@@ -162,7 +134,7 @@ app.post("/urls/:id/delete", (req, res) => {
   const id = req.params.id;
   if (!Object.keys(urlDatabase).includes(id)) {
     res.send("id does not exist");
-  } else if (!loggedIn(req, res)) {
+  } else if (!loggedIn(req, res, users)) {
     res.send("please log in");
   } else if (!Object.keys(urlsForUser(req.session.user_id, urlDatabase)).includes(id)){
     res.send("You can only edit your own urls");
@@ -176,7 +148,7 @@ app.post("/urls/:id", (req, res) => {
   const id = req.params.id;
   if (!Object.keys(urlDatabase).includes(id)) {
     res.send("id does not exist");
-  } else if (!loggedIn(req, res)) {
+  } else if (!loggedIn(req, res, users)) {
     res.send("please log in");
   } else if (!Object.keys(urlsForUser(req.session.user_id, urlDatabase)).includes(id)){
     res.send("You can only edit your own urls");
@@ -187,7 +159,7 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (loggedIn(req, res)) {
+  if (loggedIn(req, res, users)) {
     res.redirect(`/urls`);
   } else {
     const templateVars = { 

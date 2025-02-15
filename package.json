@@ -5,7 +5,7 @@
   "main": "express_server.js",
   "scripts": {
     "start": "./node_modules/.bin/nodemon -L express_server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -20,12 +20,13 @@
   "homepage": "https://github.com/nawarani/tinyapp#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.7",
     "cookie-session": "^2.1.0",
     "ejs": "^3.1.10",
     "express": "^4.21.2"
   },
   "devDependencies": {
+    "chai": "^4.3.1",
+    "mocha": "^11.1.0",
     "nodemon": "^3.1.9"
   }
 }

@@ -1,4 +1,4 @@
-function generateRandomString() {
+const generateRandomString = function() {
   const str = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let id = '';
   for(let c = 0; c < 6; c++) {
@@ -19,19 +19,25 @@ const getUserByEmail = function(email, database) {
   return null;
 };
 
-const loggedIn = (req, res) => {
+const loggedIn = (req, res, users) => {
   console.log('session: ', req.session);
   return Boolean(users[req.session.user_id]);
 }
 
-const urlsForUser = (id, urlDatabase) => {
+const urlsForUser = (id, database) => {
   const obj = {};
-  for (urlID in urlDatabase) {
-    if (urlDatabase[urlID].userID === id) {
-      obj[urlID] = urlDatabase[urlID];
+  for (urlID in database) {
+    if (database[urlID].userID === id) {
+      obj[urlID] = database[urlID];
     }
   }
   console.log('return from urluser func: ', obj);
   return obj;
 };
 
+module.exports = {
+  generateRandomString,
+  getUserByEmail,
+  loggedIn,
+  urlsForUser
+};
